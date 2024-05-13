@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": "pass",
+    "database": "ledger",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "ledger_admin",
+    "password": "pass",
+    "database": "ledger_test",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "ledger_admin",
+    "password": "pass",
+    "database": "ledger_production",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  }
+}
