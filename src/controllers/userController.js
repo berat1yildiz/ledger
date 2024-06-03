@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const logger = require('winston');
 const Sequelize = require('sequelize');
+const authorize = require('../middleware/authorization');
 
 const register = async (req, res, next) => {
   try {
@@ -50,17 +51,17 @@ const giveCredit = async (req, res, next) => {
 
     res.status(200).json({ message: 'Credit added successfully', user });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
 
 const getAllBalances = async (req, res, next) => {
   try {
-    const users = await User.findAll({ attributes: ['id', 'name', 'balance'] });
+    const users = await User.findAll({ attributes: ['email', 'balance'] });
     res.status(200).json(users);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -87,7 +88,7 @@ const transferCredit = async (req, res, next) => {
 
     res.status(200).json({ message: 'Credit transferred successfully' });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -114,7 +115,29 @@ const getUserBalanceAtTime = async (req, res, next) => {
 
     res.status(200).json(user);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+const getUserBalance = async (req, res, next) => {
+  try {
+    const userId = req.params.userId;
+    const user = await User.findByPk(userId, {
+      attributes: ['email', 'balance']
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (req.user.id !== user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    logger.error(error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -125,5 +148,6 @@ module.exports = {
   giveCredit,
   getAllBalances,
   transferCredit,
-  getUserBalanceAtTime
+  getUserBalanceAtTime,
+  getUserBalance
 };
